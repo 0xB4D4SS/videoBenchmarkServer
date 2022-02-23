@@ -1,0 +1,5 @@
+/.idea
+/__pycache__
+/venv
+ffmpeg.exe
+ffreport.log
