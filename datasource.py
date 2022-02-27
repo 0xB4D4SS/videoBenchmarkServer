@@ -12,15 +12,13 @@ def follow(thefile):
 
 
 class DataSource:
-    data = ""
 
     def __init__(self, source):
         self.source = source
-        self.readData()
 
     def readData(self):
         file = open(self.source)
         lines = follow(file)
         for line in lines:
             if "frame=" in line:
-                self.data = line
+                return line
