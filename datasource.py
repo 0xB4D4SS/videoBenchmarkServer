@@ -13,6 +13,8 @@ def follow(thefile):
 
 class DataSource:
 
+    currdata = ''
+
     def __init__(self, source):
         self.source = source
 
@@ -21,4 +23,4 @@ class DataSource:
         lines = follow(file)
         for line in lines:
             if "frame=" in line:
-                return line
+                DataSource.currdata = line
