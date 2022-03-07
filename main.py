@@ -5,12 +5,12 @@ from multiprocessing import Process
 import datasource
 
 
-def run_server():
+def run_server(datasrc):
+
     class RequestHandler(socketserver.BaseRequestHandler):
 
         def handle(self) -> None:
-            data = datasource.DataSource.currdata
-            print(datasource.DataSource.currdata)
+            data = datasrc.readData()
             self.request.sendall(bytes(data, "utf-8"))
 
     class Server(socketserver.TCPServer):
@@ -25,10 +25,6 @@ def run_server():
         sys.exit(0)
 
 
-def getData():
-    ds.readData()
-
-
 def stream(source):
     os.environ["FFREPORT"] = "file=ffreport.log:level=32"
     os.system(f"ffmpeg.exe -i {source} -f mpegts udp://127.0.0.1:9991 -loglevel quiet -report")
@@ -36,16 +32,11 @@ def stream(source):
 
 if __name__ == '__main__':
     ds = datasource.DataSource('ffreport.log')
+
     streamProcess = Process(target=stream, args=('rtsp://rtsp.stream/pattern',))
     streamProcess.start()
-    # streamProcess.join()
-    # dataProcess = Process(target=getData)
-    # dataProcess.start()
-    serverProcess = Process(target=run_server)
+
+    serverProcess = Process(target=run_server, args=(ds,))
     serverProcess.start()
     serverProcess.join()
-    while True:
-        try:
-            getData()
-        except KeyboardInterrupt:
-            sys.exit(0)
+
