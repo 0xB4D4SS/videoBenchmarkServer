@@ -18,11 +18,8 @@ def run_server(datasrc):
             super().__init__(server_address, RequestHandlerClass)
 
     server = Server(("127.0.0.1", 5000), RequestHandler)
-    try:
-        print("serving")
-        server.serve_forever()
-    except KeyboardInterrupt:
-        sys.exit(0)
+    print("serving")
+    server.serve_forever()
 
 
 def stream(source):
@@ -31,12 +28,17 @@ def stream(source):
 
 
 if __name__ == '__main__':
-    ds = datasource.DataSource('ffreport.log')
+    try:
+        ds = datasource.DataSource('ffreport.log')
 
-    streamProcess = Process(target=stream, args=('rtsp://rtsp.stream/pattern',))
-    streamProcess.start()
+        streamProcess = Process(target=stream, args=('rtsp://rtsp.stream/pattern',))
+        streamProcess.start()
 
-    serverProcess = Process(target=run_server, args=(ds,))
-    serverProcess.start()
-    serverProcess.join()
-
+        serverProcess = Process(target=run_server, args=(ds,))
+        serverProcess.start()
+        serverProcess.join()
+    except KeyboardInterrupt:
+        streamProcess.close()
+        serverProcess.close()
+        del ds
+        sys.exit(0)
