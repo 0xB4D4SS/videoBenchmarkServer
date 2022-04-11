@@ -22,19 +22,17 @@ def run_server(datasrc):
     server.serve_forever()
 
 
-def stream(source):
+def stream(source, output):
     os.environ["FFREPORT"] = "file=ffreport.log:level=32"
-    os.system(f"ffmpeg.exe -i {source} -f mpegts udp://127.0.0.1:9991 -loglevel quiet -report")
+    os.system(f"ffmpeg.exe -i {source} -f mpegts udp://{output} -loglevel quiet -report")
 
 
 if __name__ == '__main__':
+    ds = datasource.DataSource('ffreport.log')
+    streamProcess = Process(target=stream, args=('rtsp://rtsp.stream/pattern', '127.0.0.1:9991'))
+    serverProcess = Process(target=run_server, args=(ds,))
     try:
-        ds = datasource.DataSource('ffreport.log')
-
-        streamProcess = Process(target=stream, args=('rtsp://rtsp.stream/pattern',))
         streamProcess.start()
-
-        serverProcess = Process(target=run_server, args=(ds,))
         serverProcess.start()
         serverProcess.join()
     except KeyboardInterrupt:
